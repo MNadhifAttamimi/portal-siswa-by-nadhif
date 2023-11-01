@@ -1,0 +1,137 @@
+/* Register.module.css */
+
+.registerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'DM Sans', sans-serif;
+    height: 100vh;
+}
+
+.registerBox {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px 30px 30px 30px;
+    width: 450px;
+    text-align: center;
+}
+
+.title {
+    margin-bottom: 20px;
+    color: #2B3674;
+    font-family: 'DM Sans', sans-serif;
+    text-align: left;
+}
+
+.enter {
+    color: var(--secondary-grey-600, #A3AED0);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 100%; /* 16px */
+    letter-spacing: -0.32px;
+    margin-bottom: 30px;
+    text-align: left;
+    margin-top: -5px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.inputContainer {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.inputContainer label {
+    color: #2B3674;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 100%; /* 14px */
+    letter-spacing: -0.28px;
+}
+
+.input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 14px;
+    width: 410px;
+    height: 50px;
+    flex-shrink: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 100%; /* 14px */
+    letter-spacing: -0.28px;
+    background: transparent;
+    color: rgb(99, 98, 98);
+}
+
+.checkboxContainer {
+    color: #2B3674;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 142.857% */
+    letter-spacing: -0.28px;
+}
+
+.checkbox {
+    margin-right: 10px;
+}
+
+.checkboxFlex {
+    display: flex;
+    justify-content: space-between;
+}
+
+.registerButton {
+    display: flex;
+    width: 410px;
+    height: 50px;
+    padding: 10px 8px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: #4318FF;
+    border: none;
+    color: #FFF;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%; /* 14px */
+    letter-spacing: -0.28px;
+}
+
+.registerText {
+    color: #2B3674;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 26px; /* 185.714% */
+    letter-spacing: -0.28px;
+    text-align: left;
+}
+
+.registerText a {
+    color: #4318FF;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 26px;
+    letter-spacing: -0.28px;
+}
