@@ -1,71 +1,25 @@
-import { generateRandomToken } from '@/utils/RandomToken';
-import mongoose from 'mongoose';
-
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(
-            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            }
-        );
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-connectMongoDB();
-
-const Users = mongoose.model(
-    'user', // akan jadi collection dengan nama users ketika disubmit di db
-    new mongoose.Schema({
-        id: {
-            type: String,
-            require: true,
-        },
-        name: {
-            type: String,
-            require: true,
-        },
-        password: {
-            type: String,
-            require: true,
-        },
-        nis: {
-            type: String,
-            require: true,
-        },
-        token: {
-            type: String,
-            default: '',
-        },
-    })
-);
+import { getCookie } from 'cookies-next';
 
 export default async function handler(req, res) {
     try {
         if (req.method !== 'POST') {
             return res
                 .status(405)
-                .json({ error: true, message: 'mehtod tidak diijinkan' });
+                .json({ error: true, message: 'metode tidak diizinkan' });
         }
 
         const { nis, password } = req.body;
-        // validasi kosong atau tidak
 
+        // Validasi kosong atau tidak
         if (!nis) {
             return res.status(400).json({ error: true, message: 'tidak ada NIS' });
         }
 
         if (!password) {
-            return res
-                .status(400)
-                .json({ error: true, message: 'tidak ada Password' });
+            return res.status(400).json({ error: true, message: 'tidak ada Password' });
         }
 
-        // validasi sesuai kreteria atau tidak
-
+        // Validasi sesuai kreteria atau tidak
         if (nis.length !== 5) {
             return res.status(400).json({
                 error: true,
@@ -76,10 +30,12 @@ export default async function handler(req, res) {
         if (password.length < 6 || password.length >= 10) {
             return res.status(400).json({
                 error: true,
-                message: 'password harus diantar 6 sampai 10 karakter',
+                message: 'password harus di antara 6 sampai 10 karakter',
             });
         }
-        // cek apakah user ada
+
+
+        // Cek apakah user ada
         const user = await Users.findOne({ nis, password });
 
         console.log('user: ', user);
@@ -91,24 +47,27 @@ export default async function handler(req, res) {
             });
         }
 
-        // lengkapi data yg kurang
+        // Lengkapi data yang kurang
         const token = generateRandomToken(10);
 
-        // jika sudah sesuai simpan
-        const users = await Users.findOneAndUpdate(
+        // Simpan token di cookie
+        const tokenExpiration = 60 * 60 * 24 * 30; // 1 bulan dalam detik
+        setCookie('token', token, { req, res, maxAge: tokenExpiration });
+
+        // Jika sudah sesuai, simpan token
+        const updatedUser = await Users.findOneAndUpdate(
             { nis, password },
             { token },
             { new: true }
         );
-        console.log('users after update: ', users);
+        console.log('user setelah diupdate: ', updatedUser);
 
-        // kasih tahu client (hanya data yg diperbolehkan)
+        // Kasih tahu client (hanya data yang diperbolehkan)
         return res.status(200).json({ token });
     } catch (error) {
         console.log('error:', error);
         res
             .status(500)
-            .json({ error: true, message: 'ada masalah harap hubungi developer' });
+            .json({ error: true, message: 'terdapat masalah, harap hubungi pengembang' });
     }
 }
-

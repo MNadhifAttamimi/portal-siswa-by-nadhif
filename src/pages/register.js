@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from '../styles/Register.module.css'; // Ubah nama file CSS jika diperlukan
 
 export default function Register({ nextPage, previousPage }) {
+    const [name, setName] = useState('');
+    const [nis, setNis] = useState('');
+    const [password, setPassword] = useState('');
+
     const register = () => {
-        // Tambahkan logika pendaftaran di sini
+        // Mengambil nilai dari input
+        const nameValue = name;
+        const nisValue = nis;
+        const passwordValue = password;
+
+        // Tampilkan nilai di konsol (sebagai contoh)
+        console.log('Name:', nameValue);
+        console.log('NIS:', nisValue);
+        console.log('Password:', passwordValue);
+
+        // Di sini Anda dapat melakukan apa pun yang Anda butuhkan dengan nilai-nilai tersebut, seperti mengirimnya ke server atau menyimpannya di database.
     };
 
     return (
@@ -13,28 +27,41 @@ export default function Register({ nextPage, previousPage }) {
                 <p className={styles.enter}>Enter your information to create an account!</p>
                 <form id="register-form" className={styles.form}>
                     <div className={styles.inputContainer}>
-                        <label htmlFor="fullName">Nama Lengkap</label>
-                        <input type="text" id="fullName" className={styles.input} placeholder="Enter your full name" />
+                        <label htmlFor="name">Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            className={styles.input}
+                            placeholder="Enter your name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
                     </div>
                     <div className={styles.inputContainer}>
-                        <label htmlFor="email">NIS</label>
-                        <input type="email" id="email" className={styles.input} placeholder="Enter your NIS" />
+                        <label htmlFor="nis">NIS</label>
+                        <input
+                            type="text"
+                            id="nis"
+                            className={styles.input}
+                            placeholder="Enter your NIS"
+                            value={nis}
+                            onChange={(e) => setNis(e.target.value)}
+                        />
                     </div>
                     <div className={styles.inputContainer}>
                         <label htmlFor="password">Password</label>
-                        <input type="password" id="password" className={styles.input} placeholder="Password" />
+                        <input
+                            type="password"
+                            id="password"
+                            className={styles.input}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
                     </div>
-                    <div className={styles.inputContainer}>
-                        <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input type="password" id="confirmPassword" className={styles.input} placeholder="Confirm your password" />
-                    </div>
-                    <div className={styles.checkboxFlex}>
-                        <div className={styles.checkboxContainer}>
-                            <input type="checkbox" id="agreeTerms" className={styles.checkbox} />
-                            <label htmlFor="agreeTerms">I agree to the terms and conditions</label>
-                        </div>
-                    </div>
-                    <button type="button" onClick={register} className={styles.registerButton}>Register</button>
+                    <button type="button" onClick={register} className={styles.registerButton}>
+                        Register
+                    </button>
                 </form>
                 <div className={styles.registerText}>
                     Already have an account? <a href="#">Sign in</a>
@@ -43,3 +70,4 @@ export default function Register({ nextPage, previousPage }) {
         </div>
     );
 }
+

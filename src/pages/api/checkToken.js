@@ -1,3 +1,4 @@
+import { generateRandomToken } from '@/utils/RandomToken';
 import mongoose from 'mongoose';
 
 const connectMongoDB = async () => {
@@ -16,9 +17,12 @@ const connectMongoDB = async () => {
 
 connectMongoDB();
 
-const Users = mongoose.model(
-    'user', // akan jadi collection dengan nama users ketika disubmit di db
-    new mongoose.Schema({
+let Users;
+
+if (mongoose.models.user) {
+    Users = mongoose.model('user');
+} else {
+    Users = mongoose.model('user', new mongoose.Schema({
         id: {
             type: String,
             require: true,
@@ -39,25 +43,25 @@ const Users = mongoose.model(
             type: String,
             default: '',
         },
-    })
-);
+    }));
+}
 
 export default async function handler(req, res) {
     try {
         if (req.method !== 'POST') {
             return res
                 .status(405)
-                .json({ error: true, message: 'mehtod tidak diijinkan' });
+                .json({ error: true, message: 'metode tidak diizinkan' });
         }
 
         const { token } = req.body;
-        // validasi kosong atau tidak
 
+        // Validasi kosong atau tidak
         if (!token) {
             return res.status(400).json({ error: true, message: 'tidak ada token' });
         }
 
-        // cek apakah user ada
+        // Cek apakah user ada
         const user = await Users.findOne({ token });
         console.log('user: ', user);
 
@@ -68,7 +72,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // kasih tahu client (hanya data yg diperbolehkan)
+        // Kasih tahu client (hanya data yang diperbolehkan)
         return res.status(200).json({ id: user.id, nis: user.nis });
     } catch (error) {
         console.log('error:', error);
@@ -77,4 +81,3 @@ export default async function handler(req, res) {
             .json({ error: true, message: 'ada masalah harap hubungi developer' });
     }
 }
-

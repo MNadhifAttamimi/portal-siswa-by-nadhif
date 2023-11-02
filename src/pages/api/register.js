@@ -1,5 +1,6 @@
+import { generateRandomToken } from '@/utils/RandomToken';
 import mongoose from 'mongoose';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from 'uuid'; // Tambahkan impor ini
 
 const connectMongoDB = async () => {
     try {
@@ -17,9 +18,12 @@ const connectMongoDB = async () => {
 
 connectMongoDB();
 
-const Users = mongoose.model(
-    'user', // akan jadi collection dengan nama users ketika disubmit di db
-    new mongoose.Schema({
+let Users;
+
+if (mongoose.models.user) {
+    Users = mongoose.model('user');
+} else {
+    Users = mongoose.model('user', new mongoose.Schema({
         id: {
             type: String,
             require: true,
@@ -40,20 +44,20 @@ const Users = mongoose.model(
             type: String,
             default: '',
         },
-    })
-);
-
+    })); // Tambahkan tanda kurung di sini
+}
 export default async function handler(req, res) {
     try {
         // pengecekan method
         if (req.method !== 'POST') {
             return res
                 .status(405)
-                .json({ error: true, message: 'mehtod tidak diijinkan' });
+                .json({ error: true, message: 'metode tidak diizinkan' });
         }
 
         const { name, nis, password } = req.body;
-        // validasi dari client (ada atau tidak)
+
+        // Validasi dari client (ada atau tidak)
         if (!name) {
             return res.status(400).json({ error: true, message: 'tidak ada Nama' });
         }
@@ -68,7 +72,7 @@ export default async function handler(req, res) {
                 .json({ error: true, message: 'tidak ada Password' });
         }
 
-        // validasi sesuai kreteria atau tidak
+        // Validasi sesuai kriteria atau tidak
         if (name.length < 3 || name.length >= 20) {
             return res.status(400).json({
                 error: true,
@@ -89,7 +93,8 @@ export default async function handler(req, res) {
                 message: 'password harus diantar 6 sampai 10 karakter',
             });
         }
-        // cek apakah id atau nis sudah digunakan
+
+        // Cek apakah id atau nis sudah digunakan
         const user = await Users.findOne({ nis });
         console.log('user: ', user);
 
@@ -100,22 +105,21 @@ export default async function handler(req, res) {
             });
         }
 
-        // lengkapi data yg kurang
+        // Lengkapi data yang kurang
         const id = uuid();
 
         const data = { id, name, nis, password };
 
-        // jika sudah sesuai simpan
-        const users = new Users(data);
-        await users.save();
+        // Jika sudah sesuai, simpan
+        const newUser = new Users(data);
+        await newUser.save();
 
-        // kasih tahu client (hanya data yg diperbolehkan)
-        return res.status(201).json({ id: users.id, nis: users.nis });
+        // Kasih tahu client (hanya data yang diperbolehkan)
+        return res.status(201).json({ id: newUser.id, nis: newUser.nis });
     } catch (error) {
         console.log('error:', error);
         res
             .status(500)
-            .json({ error: true, message: 'ada masalah harap hubungi developer' });
+            .json({ error: true, message: 'ada masalah harap hubungi pengembang' });
     }
 }
-

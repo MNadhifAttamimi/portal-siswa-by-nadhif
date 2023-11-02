@@ -1,16 +1,28 @@
-import React from 'react';
-import Link from 'next/link'; // Menggunakan 'next/link' untuk routing
+import React, { useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { getCookie } from 'cookies-next';
 import styles from '../styles/Dashboard.module.css';
 
 export default function Dashboard() {
+    const router = useRouter();
+
+    useEffect(() => {
+        const token = getCookie('token');
+
+        if (!token) {
+            router.push('/login');
+        }
+    }, []);
+
     return (
         <div className={styles.dashboardContainer}>
             {/* Navigasi Atas */}
-            <div className={styles.navHrefhrefp}>
+            <div className={styles.navHeader}>
                 <div className={styles.title}>
                     <h3>D E E P S.</h3>
                 </div>
-                <div className={styles.logoutButhrefn}>
+                <div className={styles.logoutButton}>
                     <Link href="#">Logout</Link>
                 </div>
             </div>
