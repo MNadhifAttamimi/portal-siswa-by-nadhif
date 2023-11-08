@@ -1,4 +1,6 @@
-import { getCookie } from 'cookies-next';
+import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
+import Users from '@/pages/models/users';
+import { generateRandomToken } from '@/utils/RandomToken';
 
 export default async function handler(req, res) {
     try {
@@ -38,7 +40,7 @@ export default async function handler(req, res) {
         // Cek apakah user ada
         const user = await Users.findOne({ nis, password });
 
-        console.log('user: ', user);
+        console.log('user: ', user, "nilaiPerbandingan:", !user || !user.nis, " nis:", user.nis);
 
         if (!user || !user.nis) {
             return res.status(400).json({
