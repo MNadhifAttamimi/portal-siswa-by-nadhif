@@ -32,11 +32,14 @@ export default function Register({ nextPage, previousPage }) {
             });
 
             if (res.ok) {
-                // Periksa apakah respons memiliki status code 200 (OK)
-                const responseData = await res.json(); // Mendapatkan data JSON dari respons
-                console.log(responseData);
+                const responseData = await res.json();
+
+                // Set cookie for the client-side
+                document.cookie = `token=${responseData.token}; max-age=${responseData.tokenExpiration}; secure; samesite=None`;
+                document.cookie = `username=${responseData.name}; max-age=${responseData.tokenExpiration}; secure; samesite=None`;
+
                 alert('Data sudah sukses didaftarkan');
-                router.push('/login'); // Menggunakan router untuk navigasi
+                router.push('/login');
             } else {
                 console.error('Gagal melakukan permintaan:', res.status);
                 alert('Data gagal didaftarkan');

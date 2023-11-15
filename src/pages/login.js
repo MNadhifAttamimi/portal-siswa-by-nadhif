@@ -7,35 +7,10 @@ export default function Login() {
 
     const [nis, setNis] = useState('');
     const [password, setPassword] = useState('');
+    const [isKeepLogin, setKeepLogin] = useState('');
     const [loginError, setLoginError] = useState('');
 
-    const login = async () => {
-        try {
-            // Lakukan permintaan ke server untuk validasi login
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                body: JSON.stringify({ nis, password }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
 
-            if (response.ok) {
-                // Jika respons dari server menunjukkan login berhasil
-                // Misalnya, server dapat mengirim respons dengan status 200 dan data login berhasil
-                const data = await response.json();
-                // Menggunakan router untuk mengarahkan navigasi ke halaman dashboard
-                router.push('/dashboard');
-            } else {
-                // Handle jika login gagal, menampilkan pesan kesalahan dari server
-                const errorData = await response.json();
-                setLoginError(errorData.message);
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            setLoginError('An error occurred during login. Please try again.');
-        }
-    };
 
     return (
         <div className={styles.loginContainer}>
@@ -67,14 +42,54 @@ export default function Login() {
                     </div>
                     <div className={styles.checkboxFlex}>
                         <div className={styles.checkboxContainer}>
-                            <input type="checkbox" id="keepLoggedIn" className={styles.checkbox} />
+                            <input type="checkbox"
+                                onChange={(e) => {
+                                console.log(e.target.checked);
+                                let isChecked = e.target.checked;
+                                localStorage.setItem('keepLogin', isChecked);
+                                setKeepLogin(isChecked);
+                            }} id="keepLoggedIn" className={styles.checkbox} />
                             <label htmlFor="keepLoggedIn">Keep me logged in</label>
                         </div>
                         <div className={styles.checkboxContainer}>
                             <a href="#">Forget password?</a>
                         </div>
                     </div>
-                    <button type="button" onClick={login} className={styles.signInButton}>Sign In</button>
+                    <button type="button" onClick={async (e) => {
+            const data = { nis, password, isKeepLogin };
+            console.log('click daftar by: ', data);
+
+            try {
+              const res = await fetch('/api/login', {
+                method: 'POST', // Corrected the typo in 'method'
+                body: JSON.stringify(data), // Assuming 'data' is an object that you want to send as JSON
+                headers: {
+                  'Content-Type': 'application/json', // Specifying the content type as JSON
+                },
+              });
+              const responseData = await res.json();
+              if (res.ok) {
+                // Periksa apakah respons memiliki status code 200 (OK)
+                // Mendapatkan data JSON dari respons
+                console.log('responseData: ', responseData); //ex: {token: 'Id2Qs257T0', isKeepLogin: true}
+                localStorage.setItem('keepLogin', responseData.isKeepLogin);
+
+                if (!responseData.isKeepLogin) {
+                  sessionStorage.setItem('token', responseData.token);
+                }
+
+                alert('sukses login');
+                router.push('/dashboard');
+              } else {
+                console.error('Gagal melakukan permintaan:', res.status);
+                console.log(responseData);
+                alert(responseData.message);
+              }
+            } catch (error) {
+              console.log('error: ', error);
+              alert('Terjadi Kesalahan, harap hubungi team support');
+            }
+          }} className={styles.signInButton}>Sign In</button>
                     {loginError && <p className={styles.errorMessage}>{loginError}</p>}
                 </form>
                 <div className={styles.registerText}>
