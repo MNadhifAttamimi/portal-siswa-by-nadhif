@@ -1,19 +1,19 @@
 import { generateRandomToken } from '@/utils/RandomToken';
 import Users from '@/pages/models/users';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
-
+import bcrypt from 'bcrypt'; // Pastikan untuk menginstal library bcrypt
 
 export default async function handler(req, res) {
     try {
         if (req.method !== 'POST') {
             return res
                 .status(405)
-                .json({ error: true, message: 'mehtod tidak diijinkan' });
+                .json({ error: true, message: 'method tidak diijinkan' });
         }
 
         const { nis, password, isKeepLogin } = req.body;
-        // validasi kosong atau tidak
 
+        // Validasi kosong atau tidak
         if (!nis) {
             return res.status(400).json({ error: true, message: 'tidak ada NIS' });
         }
@@ -24,8 +24,7 @@ export default async function handler(req, res) {
                 .json({ error: true, message: 'tidak ada Password' });
         }
 
-        // validasi sesuai kreteria atau tidak
-
+        // Validasi sesuai kriteria atau tidak
         if (nis.length !== 5) {
             return res.status(400).json({
                 error: true,
@@ -39,40 +38,43 @@ export default async function handler(req, res) {
                 message: 'password harus diantar 6 sampai 10 karakter',
             });
         }
-        // cek apakah user ada
-        const user = await Users.findOne({ nis, password });
 
-        console.log('user: ', user);
+        // Cek apakah user ada
+        const user = await Users.findOne({ nis });
 
-        if (!user || !user.nis) {
+        if (!user || !user.nis || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({
                 error: true,
                 message: 'user tidak ditemukan',
             });
         }
 
-        // lengkapi data yg kurang
+        // Lengkapi data yang kurang
         const token = generateRandomToken(10);
 
         if (isKeepLogin) {
             setCookie('token', token, { req, res, maxAge: 60 * 60 * 24 * 30 }); // 1 bulan
         }
 
-        // jika sudah sesuai simpan
-        const users = await Users.findOneAndUpdate(
-            { nis, password },
+        // Jika sudah sesuai, simpan token
+        const updatedUser = await Users.findOneAndUpdate(
+            { nis },
             { token },
             { new: true }
         );
-        console.log('users after update: ', users);
 
-        // kasih tahu client (hanya data yg diperbolehkan)
+        // Kasih tahu client (hanya data yang diperbolehkan)
         return res.status(200).json({ token, isKeepLogin: !!isKeepLogin });
     } catch (error) {
         console.log('error:', error);
+        if (error.name === 'MongoError' && error.code === 11000) {
+            return res.status(400).json({
+                error: true,
+                message: 'Duplikat entry, user sudah terdaftar',
+            });
+        }
         res
             .status(500)
             .json({ error: true, message: 'ada masalah harap hubungi developer' });
     }
 }
-

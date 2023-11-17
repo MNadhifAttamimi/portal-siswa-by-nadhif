@@ -3,61 +3,128 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import styles from '../styles/Dashboard.module.css';
+import { postDataApi, getDataApi } from '@/utils/api';
+
 
 export default function Dashboard() {
-    const [user, setUser] = useState({ id: '', name: '', nis: '' });
+    const [user, setUser] = useState({ id: '', name: '', nis: '', roleName: '' });
+    const [allUsers, setAllUsers] = useState([]);
     const router = useRouter();
 
     useEffect(() => {
         const run = async () => {
             try {
                 let myToken = '';
-                // if (localStorage.getItem('keepLogin') === 'true') {
+                if (localStorage.getItem('keepLogin') === 'true') {
                     myToken = getCookie('token');
-                // } else {
-                //     myToken = sessionStorage.getItem('token');
-                // }
+                } else {
+                    myToken = sessionStorage.getItem('token');
+                }
 
                 if (myToken) {
                     const data = { token: myToken };
+
+                    // Gunakan fetch untuk validasi token
                     const res = await fetch('/api/checkToken', {
-                        method: 'POST', // Corrected the typo in 'method'
-                        body: JSON.stringify(data), // Assuming 'data' is an object that you want to send as JSON
+                        method: 'POST',
+                        body: JSON.stringify(data),
                         headers: {
-                            'Content-Type': 'application/json', // Specifying the content type as JSON
+                            'Content-Type': 'application/json',
                         },
                     });
+
                     const responseData = await res.json();
 
                     if (res.ok) {
-                        // Periksa apakah respons memiliki status code 200 (OK)
-                        // Mendapatkan data JSON dari respons
-                        console.log(responseData);
                         setUser(responseData);
                     } else {
                         console.error('Gagal melakukan permintaan:', res.data);
                         router.push('/login');
+                    }
+
+                    let myUser;
+                    await postDataApi(
+                        '/api/checkToken',
+                        data,
+                        (successData) => {
+                            let roleName = '';
+                            switch (successData.role) {
+                                case 0:
+                                    roleName = 'Santri';
+                                    break;
+                                case 1:
+                                    roleName = 'Admin';
+                                    break;
+                            }
+                            myUser = { ...successData, roleName };
+                            setUser(myUser);
+                        },
+                        (failData) => {
+                            console.log('failData: ', failData);
+                            router.push('/login');
+                        }
+                    );
+
+                    if (myUser && myUser.role === 1) {
+                        await getDataApi(
+                            '/api/listUsers',
+                            (dataSuccess) => {
+                                setAllUsers(dataSuccess.users);
+                            },
+                            (dataFail) => {
+                                console.log('dataFail: ', dataFail);
+                            }
+                        );
                     }
                 } else {
                     router.push('/login');
                 }
             } catch (error) {
                 console.log('error: ', error);
-                // alert('Terjadi Kesalahan, harap hubungi team support');
+                // alert('Terjadi Kesalahan, harap hubungi tim support');
             }
         };
 
         run();
     }, [router]);
 
+    const handleLogout = async () => {
+        let myToken = '';
+        if (localStorage.getItem('keepLogin') === 'true') {
+            myToken = getCookie('token');
+        } else {
+            sessionStorage.setItem('token', '');
+            router.push('/login');
+            return;
+        }
+        if (myToken) {
+            const data = { token: myToken };
+
+            // Gunakan postDataApi untuk logout
+            await postDataApi(
+                '/api/logout',
+                data,
+                (successData) => {
+                    router.push('/login');
+                },
+                (failData) => {
+                    console.error('Gagal melakukan permintaan:', failData);
+                    alert('Terjadi kesalahan koneksi ' + failData);
+                }
+            );
+        } else {
+            router.push('/login');
+        }
+    };
+
     return (
         <div className={styles.dashboardContainer}>
             <div className={styles.navHeader}>
                 <div className={styles.title}>
-                    <h3>{user.name}</h3>
+                    <h3>{user.name} ({user.roleName})</h3>
                 </div>
                 <div className={styles.logoutButton}>
-                    <Link href="#">Logout</Link>
+                    <button onClick={handleLogout}>Logout</button>
                 </div>
             </div>
 
