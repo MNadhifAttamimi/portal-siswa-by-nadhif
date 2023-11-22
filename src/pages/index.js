@@ -22,8 +22,8 @@ export default function Home() {
 
   return (
     <div>
-      {currentPageIndex === 0 && <Register nextPage={nextPage} />}
-      {currentPageIndex === 1 && <Login nextPage={nextPage} previousPage={previousPage} />}
+      {currentPageIndex === 0 && <Login nextPage={nextPage} />}
+      {currentPageIndex === 1 && <Register nextPage={nextPage} previousPage={previousPage} />}
       {currentPageIndex === 2 && <Dashboard previousPage={previousPage} />} {/* Tambahkan halaman Dashboard */}
       <div id="response"></div>
     </div>

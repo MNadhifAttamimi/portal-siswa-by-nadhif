@@ -1,8 +1,9 @@
+// Import library dan modul yang diperlukan
 import { generateRandomToken } from '@/utils/RandomToken';
 import Users from '@/pages/models/users';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
-import bcrypt from 'bcrypt'; // Pastikan untuk menginstal library bcrypt
 
+// Handler untuk API login
 export default async function handler(req, res) {
     try {
         if (req.method !== 'POST') {
@@ -42,7 +43,7 @@ export default async function handler(req, res) {
         // Cek apakah user ada
         const user = await Users.findOne({ nis });
 
-        if (!user || !user.nis || !(await bcrypt.compare(password, user.password))) {
+        if (!user || !user.nis ) {
             return res.status(400).json({
                 error: true,
                 message: 'user tidak ditemukan',

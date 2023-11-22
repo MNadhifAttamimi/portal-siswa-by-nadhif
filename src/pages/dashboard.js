@@ -105,6 +105,7 @@ export default function Dashboard() {
                 '/api/logout',
                 data,
                 (successData) => {
+                    console.log('Token yang diterima dari server:', successData);
                     router.push('/login');
                 },
                 (failData) => {
