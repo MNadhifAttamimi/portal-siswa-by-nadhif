@@ -1,7 +1,25 @@
 // Import library dan modul yang diperlukan
 import { generateRandomToken } from '@/utils/RandomToken';
-import Users from '@/pages/models/users';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
+import mongoose from 'mongoose';
+import UserModel from '@/pages/models/users'; // Ganti nama UserModel sesuai kebutuhan
+
+const connectMongoDB = async () => {
+    try {
+        await mongoose.connect(
+            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
+            {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+            }
+        );
+        console.log('Connected to MongoDB');
+    } catch (error) {
+        console.error('MongoDB Connection Error:', error);
+    }
+};
+
+connectMongoDB();
 
 // Handler untuk API login
 export default async function handler(req, res) {
@@ -41,9 +59,9 @@ export default async function handler(req, res) {
         }
 
         // Cek apakah user ada
-        const user = await Users.findOne({ nis });
+        const user = await UserModel.findOne({ nis });
 
-        if (!user || !user.nis ) {
+        if (!user || !user.nis) {
             return res.status(400).json({
                 error: true,
                 message: 'user tidak ditemukan',
@@ -58,7 +76,7 @@ export default async function handler(req, res) {
         }
 
         // Jika sudah sesuai, simpan token
-        const updatedUser = await Users.findOneAndUpdate(
+        const updatedUser = await UserModel.findOneAndUpdate(
             { nis },
             { token },
             { new: true }

@@ -30,9 +30,8 @@ export default function Register({ nextPage, previousPage }) {
                     'Content-Type': 'application/json',
                 },
             });
-
+            const responseData = await res.json();
             if (res.ok) {
-                const responseData = await res.json();
 
                 // Set cookie for the client-side
                 document.cookie = `token=${responseData.token}; max-age=${responseData.tokenExpiration}; secure; samesite=None`;
