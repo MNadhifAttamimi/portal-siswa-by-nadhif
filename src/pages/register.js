@@ -33,10 +33,10 @@ export default function Register({ nextPage, previousPage }) {
             const responseData = await res.json();
             if (res.ok) {
 
-                // Set cookie for the client-side
+               /*  // Set cookie for the client-side
                 document.cookie = `token=${responseData.token}; max-age=${responseData.tokenExpiration}; secure; samesite=None`;
                 document.cookie = `username=${responseData.name}; max-age=${responseData.tokenExpiration}; secure; samesite=None`;
-
+ */
                 alert('Data sudah sukses didaftarkan');
                 router.push('/login');
             } else {
