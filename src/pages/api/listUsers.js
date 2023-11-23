@@ -1,6 +1,19 @@
 import Users from '@/pages/models/users';
-import { connectMongoDB } from '@/db/mongoDB';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
+
+const connectMongoDB = async () => {
+    try {
+        await mongoose.connect(
+            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
+            {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+            }
+        );
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 connectMongoDB();
 
@@ -23,7 +36,7 @@ export default async function handler(req, res) {
 
         // cek apakah user ada
         const user = await Users.findOne({ token });
-        console.log('user: ', user);
+        // console.log('user: ', user);
 
         // jika user tidak ditemukan
         if (!user || !user.nis) {
@@ -72,4 +85,3 @@ export default async function handler(req, res) {
             .json({ error: true, message: 'ada masalah harap hubungi developer' });
     }
 }
-

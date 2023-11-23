@@ -1,50 +1,23 @@
-import { generateRandomToken } from '@/utils/RandomToken';
+import Users from '../models/users';
 import mongoose from 'mongoose';
+import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
 
 const connectMongoDB = async () => {
     try {
         await mongoose.connect(
-            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/',
+            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
             {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
             }
         );
+        console.log('Connected to MongoDB');
     } catch (error) {
-        console.log(error);
+        console.error('MongoDB Connection Error:', error);
     }
 };
 
 connectMongoDB();
-
-let Users;
-
-if (mongoose.models.user) {
-    Users = mongoose.model('user');
-} else {
-    Users = mongoose.model('user', new mongoose.Schema({
-        id: {
-            type: String,
-            require: true,
-        },
-        name: {
-            type: String,
-            require: true,
-        },
-        password: {
-            type: String,
-            require: true,
-        },
-        nis: {
-            type: String,
-            require: true,
-        },
-        token: {
-            type: String,
-            default: '',
-        },
-    }));
-}
 
 export default async function handler(req, res) {
     try {
@@ -63,7 +36,7 @@ export default async function handler(req, res) {
 
         // cek apakah user ada
         const user = await Users.findOne({ token });
-        console.log('user: ', user);
+        // console.log('user: ', user);
 
         if (!user || !user.nis) {
             deleteCookie('token', { req, res });

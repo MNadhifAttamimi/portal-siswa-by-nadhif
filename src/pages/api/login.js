@@ -2,7 +2,7 @@
 import { generateRandomToken } from '@/utils/RandomToken';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
 import mongoose from 'mongoose';
-import UserModel from '@/pages/models/users'; // Ganti nama UserModel sesuai kebutuhan
+import Users from '../models/users'; // Ganti nama UserModel sesuai kebutuhan
 
 const connectMongoDB = async () => {
     try {
@@ -27,12 +27,12 @@ export default async function handler(req, res) {
         if (req.method !== 'POST') {
             return res
                 .status(405)
-                .json({ error: true, message: 'method tidak diijinkan' });
+                .json({ error: true, message: 'mehtod tidak diijinkan' });
         }
 
         const { nis, password, isKeepLogin } = req.body;
+        // validasi kosong atau tidak
 
-        // Validasi kosong atau tidak
         if (!nis) {
             return res.status(400).json({ error: true, message: 'tidak ada NIS' });
         }
@@ -43,7 +43,8 @@ export default async function handler(req, res) {
                 .json({ error: true, message: 'tidak ada Password' });
         }
 
-        // Validasi sesuai kriteria atau tidak
+        // validasi sesuai kreteria atau tidak
+
         if (nis.length !== 5) {
             return res.status(400).json({
                 error: true,
@@ -57,9 +58,10 @@ export default async function handler(req, res) {
                 message: 'password harus diantar 6 sampai 10 karakter',
             });
         }
+        // cek apakah user ada
+        const user = await Users.findOne({ nis, password });
 
-        // Cek apakah user ada
-        const user = await UserModel.findOne({ nis });
+        // console.log('user: ', user);
 
         if (!user || !user.nis) {
             return res.status(400).json({
@@ -68,32 +70,28 @@ export default async function handler(req, res) {
             });
         }
 
-        // Lengkapi data yang kurang
+        // lengkapi data yg kurang
         const token = generateRandomToken(10);
 
         if (isKeepLogin) {
             setCookie('token', token, { req, res, maxAge: 60 * 60 * 24 * 30 }); // 1 bulan
         }
 
-        // Jika sudah sesuai, simpan token
-        const updatedUser = await UserModel.findOneAndUpdate(
-            { nis },
+        // jika sudah sesuai simpan
+        const users = await Users.findOneAndUpdate(
+            { nis, password },
             { token },
             { new: true }
         );
+        console.log('users after update: ', users);
 
-        // Kasih tahu client (hanya data yang diperbolehkan)
+        // kasih tahu client (hanya data yg diperbolehkan)
         return res.status(200).json({ token, isKeepLogin: !!isKeepLogin });
     } catch (error) {
         console.log('error:', error);
-        if (error.name === 'MongoError' && error.code === 11000) {
-            return res.status(400).json({
-                error: true,
-                message: 'Duplikat entry, user sudah terdaftar',
-            });
-        }
         res
             .status(500)
             .json({ error: true, message: 'ada masalah harap hubungi developer' });
     }
 }
+

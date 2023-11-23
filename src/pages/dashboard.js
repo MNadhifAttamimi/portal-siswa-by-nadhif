@@ -3,13 +3,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { getCookie } from 'cookies-next';
 import styles from '../styles/Dashboard.module.css';
-import { postDataApi, getDataApi } from '@/utils/api';
+import { getDataApi, postDataApi } from '../utils/api';
+
+
 
 
 export default function Dashboard() {
-    const [user, setUser] = useState({ id: '', name: '', nis: '', roleName: '' });
-    const [allUsers, setAllUsers] = useState([]);
+    const [user, setUser] = useState({ id: '', name: '', nis: '' });
     const router = useRouter();
+    const [allUsers, setAllUsers] = useState([]);
 
     useEffect(() => {
         const run = async () => {
@@ -23,8 +25,6 @@ export default function Dashboard() {
 
                 if (myToken) {
                     const data = { token: myToken };
-
-                    // Gunakan fetch untuk validasi token
                     const res = await fetch('/api/checkToken', {
                         method: 'POST',
                         body: JSON.stringify(data),
@@ -36,9 +36,10 @@ export default function Dashboard() {
                     const responseData = await res.json();
 
                     if (res.ok) {
+                        console.log(responseData);
                         setUser(responseData);
                     } else {
-                        console.error('Gagal melakukan permintaan:', res.data);
+                        console.error('Gagal melakukan permintaan:', responseData);
                         router.push('/login');
                     }
 
@@ -69,6 +70,7 @@ export default function Dashboard() {
                         await getDataApi(
                             '/api/listUsers',
                             (dataSuccess) => {
+                                console.log('dataSuccess: ', dataSuccess);
                                 setAllUsers(dataSuccess.users);
                             },
                             (dataFail) => {
@@ -76,12 +78,10 @@ export default function Dashboard() {
                             }
                         );
                     }
-                } else {
-                    router.push('/login');
                 }
             } catch (error) {
                 console.log('error: ', error);
-                // alert('Terjadi Kesalahan, harap hubungi tim support');
+                // alert('Terjadi Kesalahan, harap hubungi team support');
             }
         };
 
@@ -122,13 +122,14 @@ export default function Dashboard() {
         <div className={styles.dashboardContainer}>
             <div className={styles.navHeader}>
                 <div className={styles.title}>
-                    <h3>{user.name} ({user.roleName})</h3>
+                    <p>{user.name} {user.roleName}</p>
                 </div>
-                <div className={styles.logoutButton}>
-                    <button onClick={handleLogout}>Logout</button>
+                <div>
+                    <button className={styles.logoutButton} onClick={handleLogout}>Logout</button>
                 </div>
             </div>
 
+          <div className={styles.dataFlex}>
             <div className={styles.navSide}>
                 <Link href="#" className={styles.navItem}>
                     <div className={styles.icon}>
@@ -209,6 +210,37 @@ export default function Dashboard() {
                     </div>
                     <p>Profile</p>
                 </Link>
+            </div>
+
+            <div className={styles.dashboardContent}>
+                <div className={styles.tableContainer}>
+                    {user.role === 1 && (
+                        <>
+                            <div style={{ width: '100%' }}>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>NIS</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {allUsers &&
+                                            allUsers.map((data, index) => (
+                                                <tr key={index}>
+                                                    <td>{data.nis}</td>
+                                                    <td>{data.name}</td>
+                                                    <td>{data.status}</td>
+                                                </tr>
+                                            ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
 import { generateRandomToken } from '@/utils/RandomToken';
 import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import Users from "../models/users"
 
 const connectMongoDB = async () => {
     try {
@@ -18,47 +19,17 @@ const connectMongoDB = async () => {
 
 connectMongoDB();
 
-let Users;
-
-if (mongoose.models.user) {
-    Users = mongoose.model('user');
-} else {
-    Users = mongoose.model('user', new mongoose.Schema({
-        id: {
-            type: String,
-            required: true,
-        },
-        name: {
-            type: String,
-            required: true,
-        },
-        password: {
-            type: String,
-            required: true,
-        },
-        nis: {
-            type: String,
-            required: true,
-        },
-        token: {
-            type: String,
-            default: generateRandomToken(),
-        },
-    }));
-}
-
 export default async function handler(req, res) {
     try {
         // pengecekan method
         if (req.method !== 'POST') {
             return res
                 .status(405)
-                .json({ error: true, message: 'metode tidak diizinkan' });
+                .json({ error: true, message: 'mehtod tidak diijinkan' });
         }
 
         const { name, nis, password } = req.body;
-
-        // Validasi dari client (ada atau tidak)
+        // validasi dari client (ada atau tidak)
         if (!name) {
             return res.status(400).json({ error: true, message: 'tidak ada Nama' });
         }
@@ -73,7 +44,7 @@ export default async function handler(req, res) {
                 .json({ error: true, message: 'tidak ada Password' });
         }
 
-        // Validasi sesuai kriteria atau tidak
+        // validasi sesuai kreteria atau tidak
         if (name.length < 3 || name.length >= 20) {
             return res.status(400).json({
                 error: true,
@@ -94,10 +65,9 @@ export default async function handler(req, res) {
                 message: 'password harus diantar 6 sampai 10 karakter',
             });
         }
-
-        // Cek apakah id atau nis sudah digunakan
+        // cek apakah id atau nis sudah digunakan
         const user = await Users.findOne({ nis });
-        console.log('user: ', user);
+        // console.log('user: ', user);
 
         if (user && user.nis) {
             return res.status(400).json({
@@ -106,21 +76,22 @@ export default async function handler(req, res) {
             });
         }
 
-        // Lengkapi data yang kurang
+        // lengkapi data yg kurang
         const id = uuid();
 
         const data = { id, name, nis, password };
 
-        // Jika sudah sesuai, simpan
-        const newUser = new Users(data);
-        await newUser.save();
+        // jika sudah sesuai simpan
+        const users = new Users(data);
+        await users.save();
 
-        // Kasih tahu client (hanya data yang diperbolehkan)
-        return res.status(201).json({ id: newUser.id, nis: newUser.nis });
+        // kasih tahu client (hanya data yg diperbolehkan)
+        return res.status(201).json({ id: users.id, nis: users.nis });
     } catch (error) {
         console.log('error:', error);
         res
             .status(500)
-            .json({ error: true, message: 'ada masalah harap hubungi pengembang' });
+            .json({ error: true, message: 'ada masalah harap hubungi developer' });
     }
 }
+
