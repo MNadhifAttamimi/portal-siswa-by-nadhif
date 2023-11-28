@@ -1,21 +1,8 @@
 import { generateRandomToken } from '@/utils/RandomToken';
-import mongoose from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import Users from "../models/users"
+import Users from "../../models/users"
+import { connectMongoDB } from '@/db/mongoDB';
 
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(
-            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            }
-        );
-    } catch (error) {
-        console.log(error);
-    }
-};
 
 connectMongoDB();
 

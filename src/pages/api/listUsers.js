@@ -1,19 +1,6 @@
-import Users from '@/pages/models/users';
+import Users from '@/models/users';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
-
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(
-            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            }
-        );
-    } catch (error) {
-        console.log(error);
-    }
-};
+import { connectMongoDB } from '@/db/mongoDB';
 
 connectMongoDB();
 

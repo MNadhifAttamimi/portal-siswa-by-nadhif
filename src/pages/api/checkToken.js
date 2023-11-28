@@ -1,21 +1,7 @@
-import Users from '../models/users';
-import mongoose from 'mongoose';
+import Users from '../../models/users';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
+import { connectMongoDB } from '@/db/mongoDB';
 
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(
-            'mongodb+srv://mnadhif:9841185n@cluster0.jp7etyc.mongodb.net/portal-siswa',
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            }
-        );
-        console.log('Connected to MongoDB');
-    } catch (error) {
-        console.error('MongoDB Connection Error:', error);
-    }
-};
 
 connectMongoDB();
 
