@@ -1,86 +1,71 @@
-import   { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import styles from '@/styles/Dashboard.module.css';
 import { getCookie } from 'cookies-next';
-import styles from '../styles/Dashboard.module.css';
-import { getDataApi, postDataApi } from '../utils/api';
-
-
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { getDataApi, postDataApi } from '@/utils/api';
+import Link from 'next/link';
 
 
 export default function Dashboard() {
-    const [user, setUser] = useState({ id: '', name: '', nis: '' });
+    const [user, setUser] = useState({ id: "", name: "" });
     const router = useRouter();
     const [allUsers, setAllUsers] = useState([]);
 
     useEffect(() => {
         const run = async () => {
             try {
-                let myToken = '';
-                if (localStorage.getItem('keepLogin') === 'true') {
-                    myToken = getCookie('token');
+                let myToken = "";
+                if (localStorage.getItem("keepLogin") === "true") {
+                    myToken = getCookie("token");
                 } else {
-                    myToken = sessionStorage.getItem('token');
+                    myToken = sessionStorage.getItem("token");
                 }
 
-                if (myToken) {
-                    const data = { token: myToken };
-                    const res = await fetch('/api/checkToken', {
-                        method: 'POST',
-                        body: JSON.stringify(data),
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    });
+                // Tambahkan kondisi untuk mengarahkan ke halaman login jika token tidak tersedia
+                if (!myToken) {
+                    router.push("/login");
+                    return;
+                }
 
-                    const responseData = await res.json();
+                const data = { token: myToken };
 
-                    if (res.ok) {
-                        console.log(responseData);
-                        setUser(responseData);
-                    } else {
-                        console.error('Gagal melakukan permintaan:', responseData);
-                        router.push('/login');
+                let myUser;
+                await postDataApi(
+                    "/api/checkToken",
+                    data,
+                    (successData) => {
+                        let roleName = "";
+                        switch (successData.role) {
+                            case 0:
+                                roleName = "Santri";
+                                break;
+                            case 1:
+                                roleName = "Admin";
+                                break;
+                        }
+                        myUser = { ...successData, roleName };
+                        setUser(myUser);
+                    },
+                    (failData) => {
+                        console.log("failData: ", failData);
+                        router.push("/login");
                     }
+                );
 
-                    let myUser;
-                    await postDataApi(
-                        '/api/checkToken',
-                        data,
-                        (successData) => {
-                            let roleName = '';
-                            switch (successData.role) {
-                                case 0:
-                                    roleName = 'Santri';
-                                    break;
-                                case 1:
-                                    roleName = 'Admin';
-                                    break;
-                            }
-                            myUser = { ...successData, roleName };
-                            setUser(myUser);
+                if (myUser && myUser.role === 1) {
+                    await getDataApi(
+                        "/api/listUsers",
+                        (dataSuccess) => {
+                            console.log("dataSuccess: ", dataSuccess);
+                            setAllUsers(dataSuccess.users);
                         },
-                        (failData) => {
-                            console.log('failData: ', failData);
-                            router.push('/login');
+                        (dataFail) => {
+                            console.log("dataFail: ", dataFail);
                         }
                     );
-
-                    if (myUser && myUser.role === 1) {
-                        await getDataApi(
-                            '/api/listUsers',
-                            (dataSuccess) => {
-                                console.log('dataSuccess: ', dataSuccess);
-                                setAllUsers(dataSuccess.users);
-                            },
-                            (dataFail) => {
-                                console.log('dataFail: ', dataFail);
-                            }
-                        );
-                    }
                 }
             } catch (error) {
-                console.log('error: ', error);
+                console.log("error: ", error);
                 // alert('Terjadi Kesalahan, harap hubungi team support');
             }
         };

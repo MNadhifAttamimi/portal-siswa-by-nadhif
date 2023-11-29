@@ -1,6 +1,6 @@
 import { generateRandomToken } from '@/utils/RandomToken';
 import { v4 as uuid } from 'uuid';
-import Users from "../../models/users"
+import Users from '@/models/users';
 import { connectMongoDB } from '@/db/mongoDB';
 
 

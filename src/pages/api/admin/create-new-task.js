@@ -1,63 +1,80 @@
-import Tasks from '@/models/tasks';
-import Users from '@/models/users';
-import { connectMongoDB } from '@/db/mongoDB';
-
+// create-new-task.js
+import TaskModel from "@/models/tasks";
+import Users from "@/models/users";
+import { connectMongoDB } from "@/db/mongoDB";
 connectMongoDB();
 
 export default async function handler(req, res) {
     try {
-        // Memastikan method yang digunakan adalah POST
-        if (req.method !== 'POST') {
+        // Pemeriksaan metode, hanya izinkan metode POST
+        if (req.method !== "POST") {
             return res
                 .status(405)
-                .json({ error: true, message: 'Method tidak diijinkan' });
+                .json({ error: true, message: "Metode tidak diizinkan" });
         }
 
-        // Memastikan client mengirimkan token di headers authorization
+        // Pemeriksaan token di headers Authorization
         const token = req.headers.authorization;
         if (!token) {
-            return res.status(400).json({ error: true, message: 'Tidak ada token' });
+            return res
+                .status(400)
+                .json({ error: true, message: "Tidak ada token" });
         }
 
-        // Memastikan user yang mengakses adalah seorang Admin
+        // Cek apakah user ada
         const user = await Users.findOne({ token });
+
+        // Jika user tidak ditemukan
         if (!user || !user.nis) {
-            return res.status(400).json({
-                error: true,
-                message: 'Token tidak valid',
-            });
+            return res
+                .status(400)
+                .json({ error: true, message: "Token tidak valid" });
         }
 
-        // Cek apakah user sebagai admin
+        // Cek apakah sebagai admin
         if (user.role !== 1) {
             return res.status(400).json({
                 error: true,
-                message: 'Anda tidak memiliki hak akses/authorization',
+                message:
+                    "Anda tidak memiliki hak akses/authorization sebagai admin",
             });
         }
 
-        // Mengekstrak data dari body
+        // Destructuring data yang diterima dari client
         const { date, deadline, link, note } = req.body;
 
-        // Memastikan data yang diperlukan sudah diberikan
+        // Pemeriksaan apakah data yang dibutuhkan sudah ada
         if (!date || !deadline || !link) {
-            return res.status(400).json({
-                error: true,
-                message: 'Data yang dikirim belum lengkap',
-            });
+            return res
+                .status(400)
+                .json({
+                    error: true,
+                    message: "Data yang Anda kirimkan belum lengkap",
+                });
         }
 
-        // Menyiapkan data yang akan disimpan
-        const data = { date, deadline, note, link, teacher_id: user.id, status: 1 };
+        // Siapkan data yang akan disimpan
+        const data = {
+            date,
+            deadline,
+            note,
+            link,
+            teacher_id: user.id,
+            status: 1,
+        };
 
-        // Membuat instance TaskModel dan menyimpannya
-        const task = new Tasks(data);
-        await task.save();
+        // Simpan data ke database menggunakan model Tasks
+        const tasks = new TaskModel(data);
+        await tasks.save();
 
-        // Memberikan respons
-        return res.status(201).json({ message: 'Data sudah berhasil diinputkan' });
+        // Berikan respons sukses
+        return res
+            .status(201)
+            .json({ message: "Data sudah berhasil diinputkan" });
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ error: true, message: 'Internal Server Error' });
+        console.error("Error:", error);
+        return res
+            .status(500)
+            .json({ message: "Silahkan hubungi tim support" });
     }
 }

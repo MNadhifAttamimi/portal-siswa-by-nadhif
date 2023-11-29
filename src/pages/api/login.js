@@ -1,7 +1,7 @@
 // Import library dan modul yang diperlukan
 import { generateRandomToken } from '@/utils/RandomToken';
 import { getCookies, getCookie, setCookie, deleteCookie } from 'cookies-next';
-import Users from '../../models/users'; // Ganti nama UserModel sesuai kebutuhan
+import Users from '@/models/users';
 import { connectMongoDB } from '@/db/mongoDB';
 
 connectMongoDB();

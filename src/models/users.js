@@ -34,11 +34,12 @@ const userSchema = new mongoose.Schema({
 });
 
 let UserModel;
-// fix overwrite user
-if (mongoose.models.User) {
-    UserModel = mongoose.model('User');
+
+// Check if the model 'UserModel' already exists
+if (mongoose.models.UserModel) {
+    UserModel = mongoose.model('UserModel');
 } else {
-    UserModel = mongoose.model('User', userSchema);
+    UserModel = mongoose.model('UserModel', userSchema);
 }
 
 export default UserModel;
